@@ -88,9 +88,9 @@ function init(){
 	renderer.setClearColor(0xcce0ff);
 	document.body.appendChild(renderer.domElement);
 	
-	orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+	orbitControls = new OrbitControls(camera, renderer.domElement);
   
-	  var dragControls = new THREE.DragControls(objects, camera,
+	  var dragControls = new DragControls(objects, camera,
 			 renderer.domElement);
 	  dragControls.addEventListener('dragstart', function() {
 		 orbitControls.enabled = true;
