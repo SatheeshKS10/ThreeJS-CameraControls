@@ -1,5 +1,7 @@
 // globals
-import * as THREE from 'https://raw.githubusercontent.com/mrdoob/three.js/dev/build/three.module.js';
+import * as THREE from 'resources/three.module.js';
+import {OrbitControls} from 'resources/OrbitControl.js';
+import {DragControls} from 'resources/DragControl.js';
 var scene, camera, renderer, cubeObj, orbitControls;
 var objects = [];
 var waganZAxisVal = 0;
