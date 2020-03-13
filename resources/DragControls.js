@@ -4,23 +4,26 @@
  * Running this will allow you to drag three.js objects around the screen.
  */
 
-THREE.DragControls = function ( _objects, _camera, _domElement ) {
+import {
+	EventDispatcher,
+	Matrix4,
+	Plane,
+	Raycaster,
+	Vector2,
+	Vector3
+} from "../../../build/three.module.js";
 
-	if ( _objects instanceof THREE.Camera ) {
+var DragControls = function ( _objects, _camera, _domElement ) {
 
-		console.warn( 'THREE.DragControls: Constructor now expects ( objects, camera, domElement )' );
-		var temp = _objects; _objects = _camera; _camera = temp;
+	var _plane = new Plane();
+	var _raycaster = new Raycaster();
 
-	}
-
-	var _plane = new THREE.Plane();
-	var _raycaster = new THREE.Raycaster();
-
-	var _mouse = new THREE.Vector2();
-	var _offset = new THREE.Vector3();
-	var _intersection = new THREE.Vector3();
-	var _worldPosition = new THREE.Vector3();
-	var _inverseMatrix = new THREE.Matrix4();
+	var _mouse = new Vector2();
+	var _offset = new Vector3();
+	var _intersection = new Vector3();
+	var _worldPosition = new Vector3();
+	var _inverseMatrix = new Matrix4();
+	var _intersections = [];
 
 	var _selected = null, _hovered = null;
 
@@ -58,6 +61,12 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 
 	}
 
+	function getObjects() {
+
+		return _objects;
+
+	}
+
 	function onDocumentMouseMove( event ) {
 
 		event.preventDefault();
@@ -83,13 +92,14 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 
 		}
 
+		_intersections.length = 0;
+
 		_raycaster.setFromCamera( _mouse, _camera );
+		_raycaster.intersectObjects( _objects, true, _intersections );
 
-		var intersects = _raycaster.intersectObjects( _objects, true );
+		if ( _intersections.length > 0 ) {
 
-		if ( intersects.length > 0 ) {
-
-			var object = intersects[ 0 ].object;
+			var object = _intersections[ 0 ].object;
 
 			_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( object.matrixWorld ) );
 
@@ -121,13 +131,14 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 
 		event.preventDefault();
 
+		_intersections.length = 0;
+
 		_raycaster.setFromCamera( _mouse, _camera );
+		_raycaster.intersectObjects( _objects, true, _intersections );
 
-		var intersects = _raycaster.intersectObjects( _objects, true );
+		if ( _intersections.length > 0 ) {
 
-		if ( intersects.length > 0 ) {
-
-			_selected = intersects[ 0 ].object;
+			_selected = ( scope.transformGroup === true ) ? _objects[ 0 ] : _intersections[ 0 ].object;
 
 			if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
 
@@ -199,13 +210,14 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 		_mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
 		_mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
 
+		_intersections.length = 0;
+
 		_raycaster.setFromCamera( _mouse, _camera );
+		 _raycaster.intersectObjects( _objects, true, _intersections );
 
-		var intersects = _raycaster.intersectObjects( _objects, true );
+		if ( _intersections.length > 0 ) {
 
-		if ( intersects.length > 0 ) {
-
-			_selected = intersects[ 0 ].object;
+			_selected = ( scope.transformGroup === true ) ? _objects[ 0 ] : _intersections[ 0 ].object;
 
 			_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
 
@@ -246,41 +258,16 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 	// API
 
 	this.enabled = true;
+	this.transformGroup = false;
 
 	this.activate = activate;
 	this.deactivate = deactivate;
 	this.dispose = dispose;
-
-	// Backward compatibility
-
-	this.setObjects = function () {
-
-		console.error( 'THREE.DragControls: setObjects() has been removed.' );
-
-	};
-
-	this.on = function ( type, listener ) {
-
-		console.warn( 'THREE.DragControls: on() has been deprecated. Use addEventListener() instead.' );
-		scope.addEventListener( type, listener );
-
-	};
-
-	this.off = function ( type, listener ) {
-
-		console.warn( 'THREE.DragControls: off() has been deprecated. Use removeEventListener() instead.' );
-		scope.removeEventListener( type, listener );
-
-	};
-
-	this.notify = function ( type ) {
-
-		console.error( 'THREE.DragControls: notify() has been deprecated. Use dispatchEvent() instead.' );
-		scope.dispatchEvent( { type: type } );
-
-	};
+	this.getObjects = getObjects;
 
 };
 
-THREE.DragControls.prototype = Object.create( THREE.EventDispatcher.prototype );
-THREE.DragControls.prototype.constructor = THREE.DragControls;
+DragControls.prototype = Object.create( EventDispatcher.prototype );
+DragControls.prototype.constructor = DragControls;
+
+export { DragControls };
