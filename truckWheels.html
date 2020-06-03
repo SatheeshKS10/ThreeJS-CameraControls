@@ -3,8 +3,9 @@
  <script type="module">
  // globals
 import * as THREE from '../ThreeJS-CameraControls/resources/three.module.js';
-import {OrbitControls} from '../ThreeJS-CameraControls/resources/OrbitControl.js';
-import {DragControls} from '../ThreeJS-CameraControls/resources/DragControl.js';
+import { OrbitControls } from '../ThreeJS-CameraControls/resources/OrbitControl.js';
+import { DragControls } from '../ThreeJS-CameraControls/resources/DragControl.js';
+import { GLTFLoader } from './ThreeJS-CameraControls/resources/GLTFLoader.js';
 	 
 var scene, camera, renderer, cubeObj, orbitControls;
 var objects = [];
@@ -17,8 +18,6 @@ animate();
 function init(){
 
 	scene = new THREE.Scene();
-	
-	
 	var axesHelper = new THREE.AxesHelper( 1000 );
 	scene.add( axesHelper );
 	
@@ -27,47 +26,23 @@ function init(){
 	camera.position.y = 50;
 	camera.position.x = -550;
 	 
-	 var cubeGeo = new THREE.BoxGeometry( 200, 150, 100 );
-	
-	 var cubeGeoMaterial = new THREE.MeshPhongMaterial({color: 0x808080} );
-	
-	 cubeObj = new THREE.Mesh(cubeGeo, cubeGeoMaterial);
-	 
-	  cubeObj.position.x = -70;
-	  cubeObj.position.y = -50;
-	  cubeObj.position.z = 0;
-	  cubeObj.rotation.x = 0.5; 
-	  scene.add(cubeObj);
-	 
-	 var cubeGeo2 = new THREE.BoxGeometry( 200, 150, 100 );
-	
-	 var cubeGeoMaterial2 = new THREE.MeshPhongMaterial({color: 0x808080} );
-	
-	var cubeObj2 = new THREE.Mesh(cubeGeo2, cubeGeoMaterial2);
-	 
-	  cubeObj2.position.x = 160;
-	  cubeObj2.position.y = -50;
-	  cubeObj2.position.z = -5;
-	  
-	  cubeObj2.rotation.x = 0.5;
+	 // load wheels
+	  this.gltfloader = new GLTFLoader();
+	  this.gltfloader.setPath('assets/truck/');
+	  this.gltfloader.load('truckWheels.gltf', function (gltf) {
 
-	 scene.add(cubeObj2);
-	 
-	 var cubeGeo3 = new THREE.BoxGeometry( 200, 150, 100 );
-	
-	 var cubeGeoMaterial3 = new THREE.MeshPhongMaterial({color: 0x808080} );
-	
-	var cubeObj3 = new THREE.Mesh(cubeGeo3, cubeGeoMaterial3);
-	 
-	  cubeObj3.position.x = 440;
-	  cubeObj3.position.y = -50;
-	  cubeObj3.position.z = 0;
-	  
-	  cubeObj3.rotation.x = 0.5;
- 
-	 scene.add(cubeObj3);
-	 
-	 renderer = new THREE.WebGLRenderer({
+      	gltf.scene.traverse(function (child) {
+
+        child.position.y = -0.5; // green
+        child.position.z = -1;
+        child.position.x = 0.65;
+		
+      });
+      
+      scene.add(gltf.scene);
+    });
+   
+     renderer = new THREE.WebGLRenderer({
 		antialias : true
 	});
 	
@@ -131,6 +106,5 @@ function init(){
 		requestAnimationFrame(animate);
 	}
  </script>
-<div> <center>Find a way to move the camera in the left & right direction to see all the rectangles <a href ="https://stackoverflow.com/questions/60189897/three-js-moving-the-camera-left-and-right-side-of-the-scene"> stack overflow Discussion </a></center></div>
  </body>
  </html>
